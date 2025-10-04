@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevOps Knowledge Transfer: Weeks 1-3</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #212529;
+            margin: 0;
+            padding: 2em;
+            line-height: 1.6;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .main-title { text-align: center; color: #2c3e50; margin-bottom: 2em; }
+        .week-section { margin-bottom: 2.5em; }
+        .week-title {
+            font-size: 2em;
+            color: #fff;
+            padding: 0.5em 1em;
+            border-radius: 8px;
+            margin-bottom: 1em;
+        }
+        .week-1-title { background-color: #3498db; }
+        .week-2-title { background-color: #e74c3c; }
+        .week-3-title { background-color: #9b59b6; }
+        details {
+            background: #fff;
+            border-radius: 8px;
+            margin-bottom: 1em;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            border-left: 5px solid #bdc3c7;
+            transition: all 0.3s ease;
+        }
+        details[open] { border-left-color: inherit; }
+        .week-1 details[open] { border-left-color: #3498db; }
+        .week-2 details[open] { border-left-color: #e74c3c; }
+        .week-3 details[open] { border-left-color: #9b59b6; }
+        summary {
+            padding: 1em 1.5em;
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #34495e;
+            list-style: none;
+            outline: none;
+        }
+        summary::-webkit-details-marker { display: none; }
+        summary::before {
+            content: '►';
+            margin-right: 0.8em;
+            font-size: 0.8em;
+            transition: transform 0.2s;
+            display: inline-block;
+        }
+        details[open] > summary::before { transform: rotate(90deg); }
+        .day-content { padding: 0 1.5em 1.5em 1.5em; border-top: 1px solid #ecf0f1; }
+        h4 {
+            font-size: 1.1em;
+            color: #2980b9;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 0.3em;
+            margin-top: 1.5em;
+        }
+        .week-2 h4 { color: #c0392b; }
+        .week-3 h4 { color: #8e44ad; }
+        p { color: #555; }
+        code {
+            background-color: #ecf0f1;
+            padding: 0.2em 0.4em;
+            border-radius: 4px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+            font-size: 0.9em;
+        }
+        pre {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 1em;
+            border-radius: 6px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            font-size: 0.9em;
+        }
+        pre code { background: none; padding: 0; }
+        .bitter-fact {
+            background-color: #fff9e6;
+            border-left: 4px solid #f1c40f;
+            padding: 1em;
+            margin: 1em 0;
+        }
+        .bitter-fact strong { color: #d35400; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="main-title">DevOps Knowledge Transfer (Weeks 1-3)</h1>
+
+        <!-- WEEK 1 SECTION -->
+        <section class="week-section">
+            <h2 class="week-title week-1-title">Week 1: Container Orchestration with Docker & Kubernetes</h2>
+            <details>
+                <summary>Day 1-2: Code to Container to Cloud Registry</summary>
+                <div class="day-content">
+                    <h4>Goal:</h4>
+                    <p>Package a Python app into a portable Docker Image, optimize it, and push it to a private Artifact Registry.</p>
+                    <h4>The "Why" (Technical Concept):</h4>
+                    <p>Containerization decouples an application from its environment, ensuring it runs consistently everywhere. A private registry is a secure, centralized location to store and version these application packages (Images).</p>
+                    <div class="bitter-fact"><strong>Lesson Learned:</strong> A cloud VM is a locked-down fortress. You must configure Networking (External IP), Firewalls (allow ports), and IAM (grant service accounts the correct roles, like `Artifact Registry Writer`) to make even the simplest application work.</div>
+                    <h4>The "How" (Commands & Files):</h4>
+<pre><code># Dockerfile - The application blueprint
+FROM python:3.9-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+COPY . .
+CMD ["python", "app.py"]
+
+# Build the image from the Dockerfile in the current directory
+docker build -t my-app .
+
+# Run the container, mapping host port 5001 to container port 5000
+docker run -p 5001:5000 my-app
+
+# Tag the local image with its full remote address
+docker tag my-app asia-south1-docker.pkg.dev/PROJECT_ID/REPO_NAME/my-app:v1.0.0
+
+# Push the tagged image to the remote registry
+docker push asia-south1-docker.pkg.dev/PROJECT_ID/REPO_NAME/my-app:v1.0.0
+</code></pre>
+                </div>
+            </details>
+            <details>
+                <summary>Day 3-7: Deploying a Complete Application on GKE</summary>
+                <div class="day-content">
+                    <h4>Goal:</h4>
+                    <p>Deploy a multi-replica, self-healing, auto-scaling, and updatable application on a managed GKE cluster.</p>
+                    <h4>The "Why" (Technical Concept):</h4>
+                    <p>Orchestration is the process of automating the deployment, scaling, and management of containerized applications. You don't manage individual containers; you define a desired state using declarative YAML files, and Kubernetes works to make reality match your declaration.</p>
+                    <div class="bitter-fact"><strong>Lesson Learned:</strong> GKE has two modes. <strong>Standard</strong> gives you direct control over Nodes. <strong>Autopilot</strong> manages nodes for you, which is why <code>kubectl get nodes</code> returns "No resources found" – this is the correct behavior. Autopilot also requires you to set resource requests (`cpu`, `memory`) in your deployments, or pods will remain `Pending`.</div>
+                    <h4>The "How" (Commands & Files):</h4>
+<pre><code># (In Cloud Shell) Create a new GKE Autopilot cluster
+gcloud container clusters create my-cluster --zone=us-central1-c --enable-autopilot
+
+# (In Cloud Shell) Configure kubectl to connect to the new cluster
+gcloud container clusters get-credentials my-cluster --zone=us-central1-c
+
+# To apply a blueprint (YAML file) to the cluster
+kubectl apply -f my-deployment.yaml
+
+# Key Kubernetes Objects (YAML `kind`):
+# - Deployment: Manages a set of replica Pods. Defines the desired state.
+# - Service: Provides a stable internal network endpoint for a set of Pods.
+# - Ingress: Manages external access to services, typically for HTTP traffic.
+# - HorizontalPodAutoscaler (HPA): Automatically scales the number of pods.
+
+# Key Debugging Commands:
+# - kubectl get pods -n <namespace>      (Check high-level status)
+# - kubectl describe pod <pod-name> -n <namespace> (Check Events for errors)
+# - kubectl logs <pod-name> -n <namespace> (See application's direct output)
+</code></pre>
+                </div>
+            </details>
+        </section>
+
+        <!-- WEEK 2 SECTION -->
+        <section class="week-section">
+            <h2 class="week-title week-2-title">Week 2: Configuration Management with Ansible</h2>
+            <details>
+                <summary>Day 8-9: Ansible Setup & Idempotency</summary>
+                <div class="day-content">
+                    <h4>Goal:</h4>
+                    <p>Set up an Ansible control node, connect to remote VMs via SSH, and understand the core principle of idempotency.</p>
+                    <h4>The "Why" (Technical Concept):</h4>
+                    <p>Ansible automates the step-by-step configuration of servers. Idempotency means a script can be run multiple times, but changes are only made if the server's current state does not match the desired state. This ensures consistency and prevents errors from re-running scripts.</p>
+                    <div class="bitter-fact"><strong>Lesson Learned:</strong> Ansible connection errors are almost always SSH issues. You must specify the correct `ansible_user` and `ansible_ssh_private_key_file` in the inventory. Disabling `host_key_checking` in `ansible.cfg` is standard practice for automated, non-interactive environments.</div>
+                    <h4>The "How" (Commands & Files):</h4>
+<pre><code># inventory.ini - The "address book" for your servers
+[webservers]
+node1 ansible_host=IP_ADDRESS ansible_user=USERNAME ansible_ssh_private_key_file=~/.ssh/google_compute_engine
+
+# ansible.cfg - Configuration for Ansible itself
+[defaults]
+inventory = inventory.ini
+host_key_checking = false
+
+# Ping all servers to test connection
+ansible all -m ping
+
+# Run a playbook
+ansible-playbook my-playbook.yaml
+</code></pre>
+                </div>
+            </details>
+            <details>
+                <summary>Day 10-14: Building a Multi-Tier Application</summary>
+                <div class="day-content">
+                    <h4>Goal:</h4>
+                    <p>Automate the deployment of a two-tier application (web + database), organize the code into Roles, secure secrets with Vault, and implement rolling updates.</p>
+                    <h4>The "Why" (Technical Concept):</h4>
+                    <p>Real applications are multi-tiered. Ansible Roles provide a standardized directory structure for building clean, reusable automation code. Ansible Vault is the mandatory tool for encrypting sensitive data like passwords. Rolling updates are essential for deploying changes without causing an outage.</p>
+                    <div class="bitter-fact"><strong>Lesson Learned:</strong> Roles must be self-contained. A role's `tasks/main.yaml` must include all steps to configure its service from a blank server. A `Group docker does not exist` error proves that the task to install Docker must run *before* the task that adds a user to the docker group. Task order is critical.</div>
+                    <h4>The "How" (Commands & Files):</h4>
+<pre><code># Create a standard role structure
+ansible-galaxy init roles/my-role
+
+# site.yaml - The master plan that calls the roles
+---
+- name: Configure Web Server
+  hosts: webservers
+  roles:
+    - web
+
+# Create an encrypted file for secrets
+ansible-vault create roles/db/vars/main.yaml
+
+# Edit an existing encrypted file
+ansible-vault edit roles/db/vars/main.yaml
+
+# Run a playbook that uses a vault, prompting for the password
+ansible-playbook site.yaml --ask-vault-pass
+</code></pre>
+                </div>
+            </details>
+        </section>
+
+        <!-- WEEK 3 SECTION -->
+        <section class="week-section">
+            <h2 class="week-title week-3-title">Week 3: CI/CD Pipelines with Jenkins & GitHub Actions</h2>
+            <details>
+                <summary>Day 15-18: Building a Complete CI/CD Pipeline</summary>
+                <div class="day-content">
+                    <h4>Goal:</h4>
+                    <p>Set up a Jenkins server and create an end-to-end CI/CD pipeline that automatically builds a Docker image and deploys it to GKE.</p>
+                    <h4>The "Why" (Technical Concept):</h4>
+                    <p>A CI/CD pipeline automates the "code-to-customer" workflow. Defining this process as code in a `Jenkinsfile` makes it version-controlled, repeatable, and the single source of truth for your release process.</p>
+                    <div class="bitter-fact"><strong>Lesson Learned:</strong> Jenkins is a complex, fragile ecosystem. Debugging it is the real job. Errors like `NoSuchMethodError` mean a plugin is missing or corrupted. When a high-level abstraction fails (like `withGoogleServiceAccount`), the professional solution is to fall back to a more robust, fundamental pattern (like `withCredentials` + `writeFile` + `gcloud auth`).</div>
+                    <h4>The "How" (Commands & Files):</h4>
+<pre><code>// Jenkinsfile - The blueprint for the pipeline
+pipeline {
+    agent any
+    stages {
+        stage('Build and Push') {
+            steps {
+                // Use a credentials block to securely handle secrets
+                withCredentials([string(credentialsId: 'my-gcp-key', variable: 'SECRET_VAR')]) {
+                    // Write the secret to a temporary file
+                    writeFile(file: '/tmp/key.json', text: SECRET_VAR)
+                    // Use the file to authenticate and run commands
+                    sh "gcloud auth activate-service-account --key-file=/tmp/key.json"
+                    sh "docker push ..."
+                    // Securely clean up the secret
+                    sh "rm /tmp/key.json"
+                }
+            }
+        }
+        stage('Deploy to GKE') {
+            steps {
+                // ... similar authentication block ...
+                sh "gcloud container clusters get-credentials ..."
+                sh "kubectl set image deployment/my-app my-container=NEW_IMAGE_TAG"
+            }
+        }
+    }
+}
+</code></pre>
+                </div>
+            </details>
+             <details>
+                <summary>Day 19-21: Professionalizing the Pipeline</summary>
+                <div class="day-content">
+                    <h4>Goal:</h4>
+                    <p>Manage multiple environments (`dev`/`prod`), add an automated rollback safety net, and implement a modern, serverless alternative with GitHub Actions.</p>
+                    <h4>The "Why" (Technical Concept):</h4>
+                    <p>Separating environments is a mandatory safety practice. A pipeline that cannot detect or recover from a failed deployment is a liability. Serverless platforms like GitHub Actions eliminate the operational overhead of managing a CI server like Jenkins.</p>
+                    <div class="bitter-fact"><strong>Lesson Learned:</strong> Automation triggers are critical. The modern standard is a `webhook`, which requires a static IP and correct configuration. A misconfigured trigger can cause a DoS warning. When debugging a serverless pipeline, a silent failure often means a syntax error or incorrect file path in the YAML (`.github/workflows/main.yaml`).</div>
+                    <h4>The "How" (Commands & Files):</h4>
+<pre><code># Jenkinsfile: Logic for multi-environment deployment
+script {
+    if (env.BRANCH_NAME == 'main') {
+        TARGET_NAMESPACE = 'prod'
+    } else {
+        TARGET_NAMESPACE = 'dev'
+    }
+}
+sh "kubectl set image ... --namespace=${TARGET_NAMESPACE}"
+
+# Jenkinsfile: Logic for automated rollback
+try {
+    // 1. Deploy the new version
+    sh "kubectl set image ..."
+    // 2. Verify the new version is healthy (this command fails on a bad rollout)
+    sh "kubectl rollout status ..."
+} catch (any) {
+    // 3. If verification fails, automatically roll back
+    sh "kubectl rollout undo ..."
+    error "Deployment failed and was rolled back."
+}
+</code></pre>
+                </div>
+            </details>
+        </section>
+    </div>
+</body>
+</html>
+
